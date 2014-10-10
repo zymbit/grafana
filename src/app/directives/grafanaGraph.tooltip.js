@@ -8,6 +8,31 @@ function ($) {
     var self = this;
 
     var $tooltip = $('<div id="tooltip">');
+    var qtip = $(elem).qtip({
+      content: {
+        text: 'I am positioned in relation to the mouse'
+      },
+      show: {
+        effect: false,
+        event: false,
+        fixed: true,
+      },
+      hide: {
+        effect: false,
+        event: false,
+        fixed: true
+      },
+      position: {
+        target: false,
+        effect: false,
+        my: "left center",
+        at: "left center",
+        adjust: { x: 20 },
+      },
+      style: {
+        classes: 'qtip-dark'
+      }
+    }).qtip('api');
 
     this.findHoverIndexFromDataPoints = function(posX, series,last) {
       var ps = series.datapoints.pointsize;
@@ -32,9 +57,11 @@ function ($) {
     };
 
     this.showTooltip = function(title, innerHtml, pos) {
-      var body = '<div class="graph-tooltip small"><div class="graph-tooltip-time">'+ title + '</div> ' ;
-      body += innerHtml + '</div>';
-      $tooltip.html(body).place_tt(pos.pageX + 20, pos.pageY);
+      qtip.set('content.title', title);
+      qtip.set('content.text', innerHtml);
+      qtip.set('position.target', [pos.pageX, pos.pageY]);
+      qtip.show();
+      //$tooltip.html(body).place_tt(pos.pageX + 20, pos.pageY);
     };
 
     this.getMultiSeriesPlotHoverInfo = function(seriesList, pos) {
@@ -103,7 +130,7 @@ function ($) {
       if (scope.panel.tooltip.shared || dashboard.sharedCrosshair) {
         var plot = elem.data().plot;
         if (plot) {
-          $tooltip.detach();
+          qtip.hide();
           plot.unhighlight();
           scope.appEvent('clearCrosshair');
         }
@@ -171,7 +198,7 @@ function ($) {
       }
       // no hit
       else {
-        $tooltip.detach();
+        qtip.hide();
       }
     });
   }
