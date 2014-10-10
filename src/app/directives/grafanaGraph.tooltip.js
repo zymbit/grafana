@@ -7,7 +7,6 @@ function ($) {
   function GraphTooltip(elem, dashboard, scope, getSeriesFn) {
     var self = this;
 
-    var $tooltip = $('<div id="tooltip">');
     var qtip = $(elem).qtip({
       content: {
         text: 'I am positioned in relation to the mouse'
@@ -23,6 +22,7 @@ function ($) {
         fixed: true
       },
       position: {
+        viewport: $(window),
         target: false,
         effect: false,
         my: "left center",
@@ -61,7 +61,6 @@ function ($) {
       qtip.set('content.text', innerHtml);
       qtip.set('position.target', [pos.pageX, pos.pageY]);
       qtip.show();
-      //$tooltip.html(body).place_tt(pos.pageX + 20, pos.pageY);
     };
 
     this.getMultiSeriesPlotHoverInfo = function(seriesList, pos) {

@@ -45,7 +45,7 @@ function (angular, kbn) {
       return {
         restrict: 'A',
         link: function(scope, element, attrs) {
-          var getter = $parse(attrs.gfTip), setter = getter.assign, value = getter(scope);
+          var getter = $parse(attrs.gfTip), value = getter(scope);
           var my = attrs.my || 'top center';
           var at = attrs.at || 'bottom center';
           var content;

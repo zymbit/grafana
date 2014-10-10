@@ -420,8 +420,8 @@ function (angular, $, kbn, moment, _, GraphTooltip) {
           return data;
         });
 
-        elem.bind('plotselecting', function() {
-          elem.data().plot.selecting= true;
+        elem.bind('plotselecting', function(event, range) {
+          elem.data().plot.selecting = range !== null;
         });
 
         elem.bind("plotselected", function (event, ranges) {

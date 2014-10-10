@@ -34,6 +34,7 @@ require.config({
 
     'extend-jquery':          'components/extend-jquery',
 
+    'jquery.qtip2':            '../vendor/jquery/jquery.qtip2',
     'jquery.flot':            '../vendor/jquery/jquery.flot',
     'jquery.flot.pie':        '../vendor/jquery/jquery.flot.pie',
     'jquery.flot.events':     '../vendor/jquery/jquery.flot.events',
@@ -68,7 +69,7 @@ require.config({
       exports: 'Crypto'
     },
 
-    'jquery-ui':            ['jquery'],
+    'jquery-qtip2':         ['jquery'],
     'jquery.flot':          ['jquery'],
     'jquery.flot.pie':      ['jquery', 'jquery.flot'],
     'jquery.flot.events':   ['jquery', 'jquery.flot'],
