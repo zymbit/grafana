@@ -1,6 +1,6 @@
 define([
   'angular',
-  'kbn'
+  'kbn',
 ],
 function (angular, kbn) {
   'use strict';
@@ -36,6 +36,35 @@ function (angular, kbn) {
                           '       ng-checked="' + attrs.model + '"></input>' +
                           ' <label for="' + attrs.model + '" class="cr1"></label>';
           elem.replaceWith($compile(angular.element(template))(scope));
+        }
+      };
+    });
+
+  angular.module('grafana.directives')
+    .directive('gfTip', function($parse) {
+      return {
+        restrict: 'A',
+        link: function(scope, element, attrs) {
+          var getter = $parse(attrs.gfTip), setter = getter.assign, value = getter(scope);
+          var my = attrs.my || 'top center';
+          var at = attrs.at || 'bottom center';
+          var content;
+
+          if (value) {
+            content = { 'text': value, title: 'This is a just a test' };
+          }
+          else {
+            content = attrs.content;
+          }
+
+          element.qtip({
+            content: content,
+            position: {
+              my: my,
+              at: at,
+            },
+            style: { classes: 'qtip-dark' }
+          });
         }
       };
     });

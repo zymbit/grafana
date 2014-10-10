@@ -7,6 +7,7 @@ define([
   'lodash',
   'require',
   'config',
+  'jquery.qtip2',
   'bootstrap',
   'angular-route',
   'angular-strap',
