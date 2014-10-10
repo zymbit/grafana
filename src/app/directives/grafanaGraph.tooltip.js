@@ -30,7 +30,7 @@ function ($) {
         adjust: { x: 20 },
       },
       style: {
-        classes: 'qtip-dark'
+        classes: 'qtip-dark graph-tooltip'
       }
     }).qtip('api');
 
@@ -142,6 +142,12 @@ function ($) {
       var plotData = plot.getData();
       var seriesList = getSeriesFn();
       var group, value, timestamp, hoverInfo, i, series, seriesHtml;
+
+      if (plot.selecting) {
+        plot.unhighlight();
+        qtip.hide();
+        return;
+      }
 
       if(dashboard.sharedCrosshair){
         scope.appEvent('setCrosshair',  { pos: pos, scope: scope });

@@ -420,7 +420,13 @@ function (angular, $, kbn, moment, _, GraphTooltip) {
           return data;
         });
 
+        elem.bind('plotselecting', function() {
+          elem.data().plot.selecting= true;
+        });
+
         elem.bind("plotselected", function (event, ranges) {
+          elem.data().plot.selecting = false;
+
           scope.$apply(function() {
             timeSrv.setTime({
               from  : moment.utc(ranges.xaxis.from).toDate(),

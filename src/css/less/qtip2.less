@@ -130,7 +130,7 @@ x:-o-prefocus, .qtip .qtip-tip{
 .qtip .qtip-tip canvas{
   position: absolute;
 
-  color: #123456;
+  color: @grafanaTargetFuncBackground;
   background: transparent;
   border: 0 dashed transparent;
 }
@@ -145,13 +145,14 @@ x:-o-prefocus, .qtip .qtip-tip{
 
 /*! Dark tooltip style */
 .qtip-dark{
-  background-color: #505050;
+  background-color: @grafanaTargetFuncBackground;
   border-color: #303030;
   color: #f3f3f3;
 }
 
 .qtip-dark .qtip-titlebar{
-  background-color: #404040;
+  background-color: @grafanaTargetFuncHightlight;
+  padding: 5px 10px 4px 10px;
 }
 
 .qtip-dark .qtip-icon{
