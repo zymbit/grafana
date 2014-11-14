@@ -52,7 +52,6 @@ function (angular, _, config) {
           grafanaDB = value;
         }
       });
-
     };
 
     this.datasourceFactory = function(ds) {
@@ -74,6 +73,11 @@ function (angular, _, config) {
         Datasource = $injector.get(ds.type);
       }
       return new Datasource(ds);
+    };
+
+    this.add = function(test) {
+      datasources['var'] = test;
+      metricSources.push({name: 'var', value: 'var'});
     };
 
     this.get = function(name) {

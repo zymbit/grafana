@@ -36,6 +36,20 @@
 					</li>
 				</ul>
 
+				<ul class="grafana-segment-list">
+					<li class="grafana-target-segment annotation-segment dropdown">
+						<a class="pointer dropdown-toggle" ng-click="changeDatasource()" data-toggle="dropdown">
+							<i class="icon-download"></i>
+							Datasource: {{currentDatasource}}
+						</a>
+						<ul class="dropdown-menu" role="menu">
+							<li ng-repeat="datasource in datasources" role="menuitem">
+								<a ng-click="setDatasource(datasource);">{{datasource}}</a>
+							</li>
+						</ul>
+					</li>
+				</ul>
+
 				<div class="clearfix"></div>
 			</div>
 		</div>
