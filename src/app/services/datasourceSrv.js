@@ -12,7 +12,7 @@ function (angular, _, config) {
 
   var module = angular.module('grafana.services');
 
-  module.service('datasourceSrv', function($q, $http, $injector) {
+  module.service('datasourceSrv', function($injector, $rootScope) {
     var datasources = {};
     var metricSources = [];
     var annotationSources = [];
@@ -69,6 +69,9 @@ function (angular, _, config) {
         break;
       case 'elasticsearch':
         Datasource = $injector.get('ElasticDatasource');
+        break;
+      case 'variable':
+        Datasource = VariableDatasource;
         break;
       default:
         Datasource = $injector.get(ds.type);
@@ -128,6 +131,22 @@ function (angular, _, config) {
     this.getGrafanaDB = function() {
       return grafanaDB;
     };
+
+    var datasourceSrv = this;
+    function VariableDatasource() {
+      this.name = "variable";
+      this.value =  'variable';
+      this.default = false;
+      var self = this;
+
+      Object.setPrototypeOf(self,datasourceSrv.get(null));
+
+      $rootScope.onAppEvent('ds-changed', function(e, info) {
+        var ds=info.datasource;
+        Object.setPrototypeOf(self,datasourceSrv.get(ds));
+        $rootScope.$broadcast('refresh');
+      });
+    }
 
     this.init();
   });
