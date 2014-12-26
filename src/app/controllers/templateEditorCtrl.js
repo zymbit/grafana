@@ -7,7 +7,7 @@ function (angular, _) {
 
   var module = angular.module('grafana.controllers');
 
-  module.controller('TemplateEditorCtrl', function($scope, datasourceSrv, templateSrv, templateValuesSrv, alertSrv, datasourceVarSrv) {
+  module.controller('TemplateEditorCtrl', function($scope, datasourceSrv, templateSrv, templateValuesSrv, alertSrv) {
 
     var replacementDefaults = {
       type: 'query',
@@ -24,31 +24,6 @@ function (angular, _) {
       $scope.datasources = datasourceSrv.getMetricSources();
 
       $scope.variables = templateSrv.variables;
-      //selector for datasources
-      $scope.dtsSelector = [];
-      $scope.dtsSelection = [];
-
-      _.each($scope.datasources,function(cvar) {
-        if (cvar.name.match(/^\$./) == null) {
-          //is not a variable.
-          $scope.dtsSelector.push(cvar.name);
-        }
-      });
-
-      //selector for datasources
-      $scope.toggleDtsSelection = function(dts) {
-        var idx = $scope.dtsSelection.indexOf(dts);
-        // is currently selected
-        if (idx > -1) {
-          $scope.dtsSelection.splice(idx, 1);
-        }
-        // is newly selected
-        else {
-          $scope.dtsSelection.push(dts);
-        }
-        $scope.current.query=$scope.dtsSelection.join(',');
-      };
-
       $scope.reset();
 
       $scope.$watch('editor.index', function(index) {
@@ -60,9 +35,6 @@ function (angular, _) {
 
     $scope.add = function() {
       if ($scope.isValid()) {
-        if($scope.current && $scope.current.type === 'datasource') {
-          datasourceVarSrv.init($scope.current.name);
-        }
         $scope.variables.push($scope.current);
         $scope.update();
       }
@@ -104,12 +76,6 @@ function (angular, _) {
         $scope.current.type = 'query';
         $scope.current.allFormat = 'Glob';
       }
-      //if variable is a datasource we should update selector options.
-      if(variable.type === 'datasource') {
-        if(variable.query && variable.query.length > 0){
-          $scope.dtsSelection=variable.query.split(",");
-        }
-      }
     };
 
     $scope.update = function() {
@@ -136,9 +102,6 @@ function (angular, _) {
     };
 
     $scope.removeVariable = function(variable) {
-      if(variable && variable.type === 'datasource') {
-        datasourceVarSrv.remove(variable.name);
-      }
       var index = _.indexOf($scope.variables, variable);
       $scope.variables.splice(index, 1);
     };
