@@ -141,9 +141,8 @@ function (angular, _, config) {
 
       Object.setPrototypeOf(self,datasourceSrv.get(null));
 
-      $rootScope.onAppEvent('ds-changed', function(e, info) {
-        var ds=info.datasource;
-        Object.setPrototypeOf(self,datasourceSrv.get(ds));
+      $rootScope.onAppEvent('ds-changed', function(e, datasourceName) {
+        Object.setPrototypeOf(self,datasourceSrv.get(datasourceName));
         $rootScope.$broadcast('refresh');
       });
     }
