@@ -4,6 +4,7 @@ define([
   'lodash',
   'jquery',
   'jquery.flot',
+  'jquery.flot.gauge',
 ],
 function (angular, app, _, $) {
   'use strict';
@@ -84,6 +85,43 @@ function (angular, app, _, $) {
           return body;
         }
 
+        function addGauge() {
+          var size = Math.min(elem.width(), elem.height());
+
+          var plotCanvas = $('<div></div>');
+          var plotCss = {
+            top: '10px',
+            margin: 'auto',
+            position: 'relative',
+            height: (size - 20) + 'px',
+            width: size + 'px'
+          };
+
+          plotCanvas.css(plotCss);
+
+          var options = {
+            series: {
+              gauges: {
+                gauge: {
+                  min: panel.gauge.minValue,
+                  max: panel.gauge.maxValue,
+                  width: 35
+                },
+                cell: { border: { color: null } },
+                show: true
+              }
+            }
+          };
+
+          elem.append(plotCanvas);
+
+          var plotSeries = {
+            data: [[0, data.valueRounded]]
+          };
+
+          $.plot(plotCanvas, [plotSeries], options);
+        }
+
         function addSparkline() {
           var panel = scope.panel;
           var width = elem.width() + 20;
@@ -147,7 +185,7 @@ function (angular, app, _, $) {
 
           setElementHeight();
 
-          var body = getBigValueHtml();
+          var body = panel.gauge.show ? '' : getBigValueHtml();
 
           if (panel.colorBackground && !isNaN(data.valueRounded)) {
             var color = getColorForValue(data.valueRounded);
@@ -165,6 +203,10 @@ function (angular, app, _, $) {
           }
 
           elem.html(body);
+
+          if (panel.gauge.show) {
+            addGauge();
+          }
 
           if (panel.sparkline.show) {
             addSparkline();

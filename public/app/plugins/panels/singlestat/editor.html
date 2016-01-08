@@ -160,6 +160,35 @@
 	<div class="section" style="margin-bottom: 20px">
 		<div class="tight-form last">
 			<ul class="tight-form-list">
+				<li class="tight-form-item" style="width: 80px">
+					<strong>Gauge</strong>
+				</li>
+				<li class="tight-form-item">
+					Show&nbsp;
+					<input class="cr1" id="panel.gauge.show" type="checkbox"
+					ng-model="panel.gauge.show" ng-checked="panel.gauge.show" ng-change="render()">
+					<label for="panel.gauge.show" class="cr1"></label>
+				</li>
+				<li class="tight-form-item">
+					Min
+					<input type="text" class="input-small tight-form-input"
+                    ng-model="panel.gauge.minValue" ng-blur="render()" placeholder="0"></input>
+				</li>
+				<li class="tight-form-item last">
+					Max
+					<input type="text" class="input-small tight-form-input"
+                    ng-model="panel.gauge.maxValue" ng-blur="render()" placeholder="100"></input>
+				</li>
+			</ul>
+			<div class="clearfix"></div>
+		</div>
+	</div>
+</div>
+
+<div class="editor-row">
+	<div class="section" style="margin-bottom: 20px">
+		<div class="tight-form last">
+			<ul class="tight-form-list">
 				<li class="tight-form-item">
 					<strong>Value to text mapping</strong>
 				</li>
