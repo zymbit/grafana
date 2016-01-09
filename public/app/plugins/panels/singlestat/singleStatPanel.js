@@ -99,15 +99,29 @@ function (angular, app, _, $) {
 
           plotCanvas.css(plotCss);
 
+          var thresholds = [];
+          for (var i = 0; i <= data.thresholds.length; i++) {
+            thresholds.push({
+              value: (i === data.thresholds.length) ? panel.gauge.maxValue : data.thresholds[i+1],
+              color: data.colorMap[i]
+            });
+          }
+
           var options = {
             series: {
               gauges: {
+                debug: { log: true },
                 gauge: {
                   min: panel.gauge.minValue,
                   max: panel.gauge.maxValue,
-                  width: 35
+                  width: 35,
+                  stroke: { width: 0.000001 }, // bug in flot.gauge makes 0 impossible
+                  shadow: { show: false }
                 },
                 cell: { border: { color: null } },
+                threshold: {
+                  values: thresholds
+                },
                 show: true
               }
             }
