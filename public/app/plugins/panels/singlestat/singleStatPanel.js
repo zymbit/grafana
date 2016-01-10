@@ -114,13 +114,19 @@ function (angular, app, _, $) {
                 gauge: {
                   min: panel.gauge.minValue,
                   max: panel.gauge.maxValue,
-                  width: 35,
-                  stroke: { width: 0.000001 }, // bug in flot.gauge makes 0 impossible
-                  shadow: { show: false }
+                  frameColor: 'rgb(38,38,38)',
+                  stroke: { color: null },
+                  shadow: { show: false },
                 },
-                cell: { border: { color: null } },
+                layout: { margin: 0 },
+                cell: { border: { width: 0 } },
                 threshold: {
-                  values: thresholds
+                  values: thresholds,
+                  width: 8
+                },
+                value: {
+                  color: panel.colorValue ? getColorForValue(data.valueRounded) : null,
+                  formatter: function () { return data.valueFormated; }
                 },
                 show: true
               }
