@@ -3,6 +3,7 @@ define([
   'lodash',
   'jquery',
   'jquery.flot',
+  'jquery.flot.gauge',
 ],
 function (SingleStatCtrl, _, $) {
   'use strict';
@@ -147,6 +148,63 @@ function (SingleStatCtrl, _, $) {
           $.plot(plotCanvas, [plotSeries], options);
         }
 
+        function addGauge() {
+          var size = Math.min(elem.width(), elem.height());
+
+          var plotCanvas = $('<div></div>');
+          var plotCss = {
+            top: '0',
+            margin: 'auto',
+            position: 'relative',
+            height: size + 'px',
+            width: size + 'px'
+          };
+
+          plotCanvas.css(plotCss);
+
+          var thresholds = [];
+          for (var i = 0; i <= data.thresholds.length; i++) {
+            thresholds.push({
+              value: (i === data.thresholds.length) ? panel.gauge.maxValue : data.thresholds[i+1],
+              color: data.colorMap[i]
+            });
+          }
+
+          var options = {
+            series: {
+              gauges: {
+                debug: { log: true },
+                gauge: {
+                  min: panel.gauge.minValue,
+                  max: panel.gauge.maxValue,
+                  frameColor: 'rgb(38,38,38)',
+                  stroke: { color: null },
+                  shadow: { show: false },
+                },
+                layout: { margin: 0 },
+                cell: { border: { width: 0 } },
+                threshold: {
+                  values: thresholds,
+                  width: 8
+                },
+                value: {
+                  color: panel.colorValue ? getColorForValue(data.valueRounded) : null,
+                  formatter: function () { return data.valueFormated; }
+                },
+                show: true
+              }
+            }
+          };
+
+          elem.append(plotCanvas);
+
+          var plotSeries = {
+            data: [[0, data.valueRounded]]
+          };
+
+          $.plot(plotCanvas, [plotSeries], options);
+        }
+
         function render() {
           if (!scope.data) { return; }
 
@@ -155,7 +213,7 @@ function (SingleStatCtrl, _, $) {
 
           setElementHeight();
 
-          var body = getBigValueHtml();
+          var body = panel.gauge.show ? '' : getBigValueHtml();
 
           if (panel.colorBackground && !isNaN(data.valueRounded)) {
             var color = getColorForValue(data.valueRounded);
@@ -173,6 +231,10 @@ function (SingleStatCtrl, _, $) {
           }
 
           elem.html(body);
+
+          if (panel.gauge.show) {
+            addGauge();
+          }
 
           if (panel.sparkline.show) {
             addSparkline();
