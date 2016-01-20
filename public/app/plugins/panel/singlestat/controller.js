@@ -53,6 +53,11 @@ function (angular, app, _, kbn, TimeSeries, PanelMeta) {
         full: false,
         lineColor: 'rgb(31, 120, 193)',
         fillColor: 'rgba(31, 118, 189, 0.18)',
+      },
+      gauge: {
+        show: false,
+        minValue: 0,
+        maxValue: 100
       }
     };
 
