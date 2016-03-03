@@ -60,6 +60,7 @@ function (angular, _) {
 
       var cmdData = {
         dashboard: dash,
+        name: dash.title,
         expires: $scope.snapshot.expires,
       };
 
@@ -116,7 +117,7 @@ function (angular, _) {
       // remove template queries
       _.each(dash.templating.list, function(variable) {
         variable.query = "";
-        variable.options = [];
+        variable.options = variable.current;
         variable.refresh = false;
       });
 

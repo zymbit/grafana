@@ -2,8 +2,11 @@ package plugins
 
 import (
 	"encoding/json"
+	"errors"
+	"strings"
 
-	"github.com/grafana/grafana/pkg/models"
+	"github.com/grafana/grafana/pkg/log"
+	"github.com/grafana/grafana/pkg/setting"
 )
 
 type PluginLoader interface {
@@ -11,21 +14,37 @@ type PluginLoader interface {
 }
 
 type PluginBase struct {
-	Type      string     `json:"type"`
-	Name      string     `json:"name"`
-	Id        string     `json:"id"`
-	App       string     `json:"app"`
-	Info      PluginInfo `json:"info"`
-	PluginDir string     `json:"-"`
+	Type string     `json:"type"`
+	Name string     `json:"name"`
+	Id   string     `json:"id"`
+	Info PluginInfo `json:"info"`
+
+	IncludedInAppId string `json:"-"`
+	PluginDir       string `json:"-"`
+}
+
+func (pb *PluginBase) registerPlugin(pluginDir string) error {
+	if _, exists := Plugins[pb.Id]; exists {
+		return errors.New("Plugin with same id already exists")
+	}
+
+	if !strings.HasPrefix(pluginDir, setting.StaticRootPath) {
+		log.Info("Plugins: Registering plugin %v", pb.Name)
+	}
+
+	pb.PluginDir = pluginDir
+	Plugins[pb.Id] = pb
+	return nil
 }
 
 type PluginInfo struct {
-	Author      PluginInfoLink   `json:"author"`
-	Description string           `json:"description"`
-	Links       []PluginInfoLink `json:"links"`
-	Logos       PluginLogos      `json:"logos"`
-	Version     string           `json:"version"`
-	Updated     string           `json:"updated"`
+	Author      PluginInfoLink      `json:"author"`
+	Description string              `json:"description"`
+	Links       []PluginInfoLink    `json:"links"`
+	Logos       PluginLogos         `json:"logos"`
+	Screenshots []PluginScreenshots `json:"screenshots"`
+	Version     string              `json:"version"`
+	Updated     string              `json:"updated"`
 }
 
 type PluginInfoLink struct {
@@ -38,29 +57,19 @@ type PluginLogos struct {
 	Large string `json:"large"`
 }
 
+type PluginScreenshots struct {
+	Path string `json:"path"`
+	Name string `json:"name"`
+}
+
 type PluginStaticRoute struct {
 	Directory string
 	PluginId  string
 }
 
-type ApiPluginRoute struct {
-	Path            string          `json:"path"`
-	Method          string          `json:"method"`
-	ReqSignedIn     bool            `json:"reqSignedIn"`
-	ReqGrafanaAdmin bool            `json:"reqGrafanaAdmin"`
-	ReqRole         models.RoleType `json:"reqRole"`
-	Url             string          `json:"url"`
-}
-
-type ApiPlugin struct {
-	PluginBase
-	Routes []*ApiPluginRoute `json:"routes"`
-}
-
 type EnabledPlugins struct {
 	Panels      []*PanelPlugin
 	DataSources map[string]*DataSourcePlugin
-	ApiList     []*ApiPlugin
 	Apps        []*AppPlugin
 }
 
@@ -68,7 +77,6 @@ func NewEnabledPlugins() EnabledPlugins {
 	return EnabledPlugins{
 		Panels:      make([]*PanelPlugin, 0),
 		DataSources: make(map[string]*DataSourcePlugin),
-		ApiList:     make([]*ApiPlugin, 0),
 		Apps:        make([]*AppPlugin, 0),
 	}
 }

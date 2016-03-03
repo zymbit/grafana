@@ -21,21 +21,23 @@ module.exports = function(config, grunt) {
       grunt.task.run('jscs');
     }
 
-    if (/(\.less)$/.test(filepath)) {
+    if (/(\.scss)$/.test(filepath)) {
       grunt.task.run('clean:css');
       grunt.task.run('css');
     }
 
     if (/(\.ts)$/.test(filepath)) {
+      newPath = filepath.replace(/^public/, 'public_gen');
+      grunt.log.writeln('Copying to ' + newPath);
+      grunt.file.copy(filepath, newPath);
+
+      // copy ts file also used by source maps
       //changes changed file source to that of the changed file
       var option = 'typescript.build.src';
       var result = filepath;
       grunt.config(option, result);
       grunt.task.run('typescript:build');
       grunt.task.run('tslint');
-      // copy ts file also used by source maps
-      newPath = filepath.replace(/^public/, 'public_gen');
-      grunt.file.copy(filepath, newPath);
     }
   });
 

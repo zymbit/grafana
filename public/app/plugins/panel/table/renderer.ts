@@ -16,16 +16,16 @@ export class TableRenderer {
   getColorForValue(value, style) {
     if (!style.thresholds) { return null; }
 
-    for (var i = style.thresholds.length - 1; i >= 0 ; i--) {
-      if (value >= style.thresholds[i]) {
+    for (var i = style.thresholds.length; i > 0; i--) {
+      if (value >= style.thresholds[i - 1]) {
         return style.colors[i];
       }
     }
-    return null;
+    return _.first(style.colors);
   }
 
   defaultCellFormater(v) {
-    if (v === null || v === void 0) {
+    if (v === null || v === void 0 || v === undefined) {
       return '';
     }
 
@@ -35,7 +35,6 @@ export class TableRenderer {
 
     return v;
   }
-
 
   createColumnFormater(style) {
     if (!style) {
@@ -96,13 +95,13 @@ export class TableRenderer {
   }
 
   renderCell(columnIndex, value, addWidthHack = false) {
-    var value = this.formatColumnValue(columnIndex, value);
+    value = this.formatColumnValue(columnIndex, value);
+    value = _.escape(value);
     var style = '';
     if (this.colorState.cell) {
       style = ' style="background-color:' + this.colorState.cell + ';color: white"';
       this.colorState.cell = null;
-    }
-    else if (this.colorState.value) {
+    } else if (this.colorState.value) {
       style = ' style="color:' + this.colorState.value + '"';
       this.colorState.value = null;
     }

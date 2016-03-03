@@ -41,6 +41,7 @@ export default class TimeSeries {
   nullPointMode: any;
   fillBelowTo: any;
   transform: any;
+  flotpairs: any;
 
   constructor(opts) {
     this.datapoints = opts.datapoints;
@@ -132,7 +133,7 @@ export default class TimeSeries {
         }
       }
 
-      if (currentValue != 0) {
+      if (currentValue !== 0) {
         this.allIsZero = false;
       }
 
@@ -166,5 +167,17 @@ export default class TimeSeries {
 
   formatValue(value) {
     return this.valueFormater(value, this.decimals, this.scaledDecimals);
+  }
+
+  isMsResolutionNeeded() {
+    for (var i = 0; i<this.datapoints.length; i++) {
+      if (this.datapoints[i][0] !== null) {
+        var timestamp = this.datapoints[i][0].toString();
+        if (timestamp.length === 13 && (timestamp % 1000) !== 0) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 }

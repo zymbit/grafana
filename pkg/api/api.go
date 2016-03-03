@@ -1,11 +1,12 @@
 package api
 
 import (
-	"github.com/Unknwon/macaron"
+	"github.com/go-macaron/binding"
+	"github.com/grafana/grafana/pkg/api/avatar"
 	"github.com/grafana/grafana/pkg/api/dtos"
 	"github.com/grafana/grafana/pkg/middleware"
 	m "github.com/grafana/grafana/pkg/models"
-	"github.com/macaron-contrib/binding"
+	"gopkg.in/macaron.v1"
 )
 
 // Register adds http routes
@@ -40,9 +41,11 @@ func Register(r *macaron.Macaron) {
 	r.Get("/admin/users/edit/:id", reqGrafanaAdmin, Index)
 	r.Get("/admin/orgs", reqGrafanaAdmin, Index)
 	r.Get("/admin/orgs/edit/:id", reqGrafanaAdmin, Index)
+	r.Get("/admin/stats", reqGrafanaAdmin, Index)
 
-	r.Get("/apps", reqSignedIn, Index)
-	r.Get("/apps/edit/*", reqSignedIn, Index)
+	r.Get("/plugins", reqSignedIn, Index)
+	r.Get("/plugins/:id/edit", reqSignedIn, Index)
+	r.Get("/plugins/:id/page/:page", reqSignedIn, Index)
 
 	r.Get("/dashboard/*", reqSignedIn, Index)
 	r.Get("/dashboard-solo/*", reqSignedIn, Index)
@@ -68,9 +71,11 @@ func Register(r *macaron.Macaron) {
 	r.Post("/api/user/password/reset", bind(dtos.ResetUserPasswordForm{}), wrap(ResetPassword))
 
 	// dashboard snapshots
-	r.Post("/api/snapshots/", bind(m.CreateDashboardSnapshotCommand{}), CreateDashboardSnapshot)
 	r.Get("/dashboard/snapshot/*", Index)
+	r.Get("/dashboard/snapshots/", reqSignedIn, Index)
 
+	// api for dashboard snapshots
+	r.Post("/api/snapshots/", bind(m.CreateDashboardSnapshotCommand{}), CreateDashboardSnapshot)
 	r.Get("/api/snapshot/shared-options/", GetSharingOptions)
 	r.Get("/api/snapshots/:key", GetDashboardSnapshot)
 	r.Get("/api/snapshots-delete/:key", DeleteDashboardSnapshot)
@@ -122,9 +127,9 @@ func Register(r *macaron.Macaron) {
 			r.Patch("/invites/:code/revoke", wrap(RevokeInvite))
 
 			// apps
-			r.Get("/apps", wrap(GetOrgAppsList))
-			r.Get("/apps/:appId/settings", wrap(GetAppSettingsById))
-			r.Post("/apps/:appId/settings", bind(m.UpdateAppSettingsCmd{}), wrap(UpdateAppSettings))
+			r.Get("/plugins", wrap(GetPluginList))
+			r.Get("/plugins/:pluginId/settings", wrap(GetPluginSettingById))
+			r.Post("/plugins/:pluginId/settings", bind(m.UpdatePluginSettingCmd{}), wrap(UpdatePluginSetting))
 		}, reqOrgAdmin)
 
 		// create new org
@@ -182,6 +187,11 @@ func Register(r *macaron.Macaron) {
 			r.Get("/tags", GetDashboardTags)
 		})
 
+		// Dashboard snapshots
+		r.Group("/dashboard/snapshots", func() {
+			r.Get("/", wrap(SearchDashboardSnapshots))
+		})
+
 		// Playlist
 		r.Group("/playlists", func() {
 			r.Get("/", wrap(SearchPlaylists))
@@ -189,8 +199,8 @@ func Register(r *macaron.Macaron) {
 			r.Get("/:id/items", ValidateOrgPlaylist, wrap(GetPlaylistItems))
 			r.Get("/:id/dashboards", ValidateOrgPlaylist, wrap(GetPlaylistDashboards))
 			r.Delete("/:id", reqEditorRole, ValidateOrgPlaylist, wrap(DeletePlaylist))
-			r.Put("/:id", reqEditorRole, bind(m.UpdatePlaylistQuery{}), ValidateOrgPlaylist, wrap(UpdatePlaylist))
-			r.Post("/", reqEditorRole, bind(m.CreatePlaylistQuery{}), wrap(CreatePlaylist))
+			r.Put("/:id", reqEditorRole, bind(m.UpdatePlaylistCommand{}), ValidateOrgPlaylist, wrap(UpdatePlaylist))
+			r.Post("/", reqEditorRole, bind(m.CreatePlaylistCommand{}), wrap(CreatePlaylist))
 		})
 
 		// Search
@@ -210,12 +220,17 @@ func Register(r *macaron.Macaron) {
 		r.Delete("/users/:id", AdminDeleteUser)
 		r.Get("/users/:id/quotas", wrap(GetUserQuotas))
 		r.Put("/users/:id/quotas/:target", bind(m.UpdateUserQuotaCmd{}), wrap(UpdateUserQuota))
+		r.Get("/stats", AdminGetStats)
 	}, reqGrafanaAdmin)
 
 	// rendering
 	r.Get("/render/*", reqSignedIn, RenderToPng)
 
-	InitApiPluginRoutes(r)
+	// Gravatar service.
+	avt := avatar.CacheServer()
+	r.Get("/avatar/:hash", avt.ServeHTTP)
+
+	InitAppPluginRoutes(r)
 
 	r.NotFound(NotFoundHandler)
 }
