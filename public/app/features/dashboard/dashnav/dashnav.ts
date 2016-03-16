@@ -17,6 +17,8 @@ export class DashNavCtrl {
 
       $scope.showSettingsMenu = $scope.dashboardMeta.canEdit || $scope.contextSrv.isEditor;
 
+      $scope.showDashnav = $location.search().dashnav === '0' ? false : true;
+
       if ($scope.dashboardMeta.isSnapshot) {
         $scope.showSettingsMenu = false;
         var meta = $scope.dashboardMeta;
