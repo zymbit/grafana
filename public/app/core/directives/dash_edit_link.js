@@ -1,31 +1,18 @@
 define([
   'jquery',
   '../core_module',
+  '../app_events',
 ],
-function ($, coreModule) {
+function ($, coreModule, appEvents) {
   'use strict';
+
+  appEvents = appEvents.default;
 
   var editViewMap = {
     'settings':    { src: 'public/app/features/dashboard/partials/settings.html', title: "Settings" },
     'annotations': { src: 'public/app/features/annotations/partials/editor.html', title: "Annotations" },
     'templating':  { src: 'public/app/features/templating/partials/editor.html', title: "Templating" }
   };
-
-  coreModule.default.directive('dashEditorLink', function($timeout) {
-    return {
-      restrict: 'A',
-      link: function(scope, elem, attrs) {
-        var partial = attrs.dashEditorLink;
-
-        elem.bind('click',function() {
-          $timeout(function() {
-            var editorScope = attrs.editorScope === 'isolated' ? null : scope;
-            scope.appEvent('show-dash-editor', { src: partial, scope: editorScope });
-          });
-        });
-      }
-    };
-  });
 
   coreModule.default.directive('dashEditorView', function($compile, $location) {
     return {
@@ -36,12 +23,12 @@ function ($, coreModule) {
 
         function hideEditorPane() {
           if (editorScope) {
-            scope.appEvent('dash-editor-hidden', lastEditor);
+            appEvents.emit('dash-editor-hidden', lastEditor);
             editorScope.dismiss();
           }
         }
 
-        function showEditorPane(evt, payload, editview) {
+        function showEditorPane(payload, editview) {
           if (editview) {
             scope.contextSrv.editview = editViewMap[editview];
             payload.src = scope.contextSrv.editview.src;
@@ -81,7 +68,7 @@ function ($, coreModule) {
 
         scope.$watch("dashboardViewState.state.editview", function(newValue, oldValue) {
           if (newValue) {
-            showEditorPane(null, {}, newValue);
+            showEditorPane({}, newValue);
           } else if (oldValue) {
             scope.contextSrv.editview = null;
             if (lastEditor === editViewMap[oldValue]) {
@@ -91,9 +78,15 @@ function ($, coreModule) {
         });
 
         scope.contextSrv.editview = null;
-        scope.$on("$destroy", hideEditorPane);
-        scope.onAppEvent('hide-dash-editor', hideEditorPane);
-        scope.onAppEvent('show-dash-editor', showEditorPane);
+
+        var sub1 = appEvents.on('hide-dash-editor', hideEditorPane);
+        var sub2 = appEvents.on('show-dash-editor', showEditorPane);
+
+        scope.$on("$destroy", function() {
+          sub1.unsubscribe();
+          sub2.unsubscribe();
+          hideEditorPane();
+        });
       }
     };
   });

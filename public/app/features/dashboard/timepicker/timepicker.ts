@@ -3,6 +3,7 @@
 import _ from 'lodash';
 import angular from 'angular';
 import moment from 'moment';
+import appEvents from 'app/core/app_events';
 
 import * as rangeUtil from 'app/core/utils/rangeutil';
 
@@ -27,11 +28,10 @@ export class TimePickerCtrl {
 
   /** @ngInject */
   constructor(private $scope, private $rootScope, private timeSrv) {
-    $scope.ctrl = this;
 
-    $rootScope.onAppEvent('zoom-out', () => this.zoom(2), $scope);
-    $rootScope.onAppEvent('refresh', () => this.init(), $scope);
-    $rootScope.onAppEvent('dash-editor-hidden', () => this.isOpen = false, $scope);
+    appEvents.on('zoom-out', () => this.zoom(2), $scope);
+    appEvents.on('refresh', this.init.bind(this), $scope);
+    appEvents.on('dash-editor-hidden', () => this.isOpen = false, $scope);
 
     this.init();
   }
@@ -100,7 +100,7 @@ export class TimePickerCtrl {
 
     this.refresh.options.unshift({text: 'off'});
 
-    this.$rootScope.appEvent('show-dash-editor', {
+    appEvents.emit('show-dash-editor', {
       src: 'public/app/features/dashboard/timepicker/dropdown.html',
       scope: this.$scope,
       cssClass: 'gf-timepicker-dropdown',
@@ -113,7 +113,7 @@ export class TimePickerCtrl {
     }
 
     this.timeSrv.setTime(this.timeRaw, true);
-    this.$rootScope.appEvent('hide-dash-editor');
+    appEvents.emit('hide-dash-editor');
   }
 
   absoluteFromChanged() {
@@ -136,9 +136,9 @@ export class TimePickerCtrl {
     }
 
     this.timeSrv.setTime(range);
-    this.$rootScope.appEvent('hide-dash-editor');
-  }
 
+    appEvents.emit('hide-dash-editor');
+  }
 }
 
 export function settingsDirective() {
