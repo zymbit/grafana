@@ -20,7 +20,9 @@ function (angular, $, config, moment) {
       unsavedChangesSrv,
       dashboardViewStateSrv,
       contextSrv,
-      $timeout) {
+      $timeout,
+      $interval,
+      $location) {
 
     $scope.editor = { index: 0 };
     $scope.panels = config.panels;
@@ -138,6 +140,39 @@ function (angular, $, config, moment) {
       return moment(date).format('MMM Do YYYY, h:mm:ss a');
     };
 
-  });
+    if($location.search().embed === 'true') {
+      var count = 0;
+      var lastHeight = 0;
 
+      // use an interval to find the height changes so that the iframe
+      // is properly sized to the fully rendered size.  at times the
+      // height of the iframe changes depending on the number of rows
+      // the dashboard has.  the interval will check every 100ms for
+      // about 10s.
+      var resizeInterval = $interval(function () {
+        var height = $(document).height();
+
+        if(!height) {
+          return;
+        }
+
+        if(height !== lastHeight) {
+          lastHeight = height;
+
+          var data = {
+            'type': 'grafana-resize',
+            'height': height
+          };
+
+          window.parent.postMessage(data, '*');
+        } else {
+          count += 1;
+        }
+
+        if(count > 100) {
+          $interval.cancel(resizeInterval);
+        }
+      }, 100);
+    }
+  });
 });
