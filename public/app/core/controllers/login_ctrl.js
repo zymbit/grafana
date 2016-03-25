@@ -7,8 +7,9 @@ function (angular, coreModule, config) {
   'use strict';
 
   function getAuthFromCookie() {
-    var redirectTo = getCookie('redirect_to');
-    if(redirectTo !== '') {
+    var b64RedirectTo = getCookie('redirect_to');
+    if(b64RedirectTo !== '') {
+      var redirectTo = atob(b64RedirectTo);
       var redirectToDecoded = decodeURIComponent(decodeURIComponent(redirectTo));
       var components = redirectToDecoded.split('?', 2)[1].split('&');
 
