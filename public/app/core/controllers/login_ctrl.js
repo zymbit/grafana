@@ -6,7 +6,36 @@ define([
 function (angular, coreModule, config) {
   'use strict';
 
-  coreModule.default.controller('LoginCtrl', function($scope, backendSrv, contextSrv, $location) {
+  function getAuthFromCookie() {
+    var redirectTo = getCookie('redirect_to')
+    if(redirectTo != '') {
+      var i = 0;
+      var redirectToDecoded = decodeURIComponent(decodeURIComponent(redirectTo));
+      var components = redirectToDecoded.split('?', 2)[1].split('&');
+
+      for(i = 0; i < components.length; i++) {
+        var kv = components[i].split('=', 2);
+        if(kv[0] == 'auth') {
+          return kv[1].split(':', 2);
+        }
+      }
+    }
+  }
+
+  // http://www.w3schools.com/js/js_cookies.asp
+  function getCookie(cname) {
+    var name = cname + "=";
+    var ca = document.cookie.split(';');
+    for(var i=0; i<ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0)==' ') c = c.substring(1);
+        if (c.indexOf(name) == 0) return c.substring(name.length,c.length);
+    }
+    return "";
+  }
+
+
+  coreModule.default.controller('LoginCtrl', function($scope, backendSrv, contextSrv, $location, $timeout) {
     $scope.formModel = {
       user: '',
       email: '',
@@ -33,6 +62,19 @@ function (angular, coreModule, config) {
         delete params.failedMsg;
         $location.search(params);
       }
+
+      // TODO: make an angular component out of this?
+      $timeout(function () {
+        var auth = getAuthFromCookie();
+        if(auth) {
+          $scope.formModel.user = auth[0];
+          $scope.formModel.password = auth[1];
+
+          $scope.loginForm.$valid = true;
+
+          $scope.submit();
+        }
+      });
     };
 
     // build info view model
