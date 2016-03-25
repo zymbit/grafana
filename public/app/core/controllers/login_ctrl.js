@@ -7,15 +7,14 @@ function (angular, coreModule, config) {
   'use strict';
 
   function getAuthFromCookie() {
-    var redirectTo = getCookie('redirect_to')
-    if(redirectTo != '') {
-      var i = 0;
+    var redirectTo = getCookie('redirect_to');
+    if(redirectTo !== '') {
       var redirectToDecoded = decodeURIComponent(decodeURIComponent(redirectTo));
       var components = redirectToDecoded.split('?', 2)[1].split('&');
 
-      for(i = 0; i < components.length; i++) {
+      for(var i=0; i<components.length; i++) {
         var kv = components[i].split('=', 2);
-        if(kv[0] == 'auth') {
+        if(kv[0] === 'auth') {
           return kv[1].split(':', 2);
         }
       }
@@ -27,13 +26,12 @@ function (angular, coreModule, config) {
     var name = cname + "=";
     var ca = document.cookie.split(';');
     for(var i=0; i<ca.length; i++) {
-        var c = ca[i];
-        while (c.charAt(0)==' ') c = c.substring(1);
-        if (c.indexOf(name) == 0) return c.substring(name.length,c.length);
+      var c = ca[i];
+      while (c.charAt(0)===' ') { c = c.substring(1); }
+      if (c.indexOf(name) === 0) { return c.substring(name.length,c.length); }
     }
     return "";
   }
-
 
   coreModule.default.controller('LoginCtrl', function($scope, backendSrv, contextSrv, $location, $timeout) {
     $scope.formModel = {
