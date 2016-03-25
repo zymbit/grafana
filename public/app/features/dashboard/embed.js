@@ -1,28 +1,21 @@
 (function() {
-
-  var DE = window.DiscourseEmbed || {};
-  var comments = document.getElementById('discourse-comments');
+  var GE = window.GrafanaEmbed || {};
+  var dashboard = document.getElementById('grafana-dashboard');
   var iframe = document.createElement('iframe');
 
-  ['discourseUrl', 'discourseEmbedUrl', 'discourseUserName'].forEach(function(i) {
-    if (window[i]) { DE[i] = DE[i] || window[i]; }
+  ['grafanaUrl', 'embedUrl', 'dashnav'].forEach(function(i) {
+    if (window[i]) { GE[i] = GE[i] || window[i]; }
   });
 
-  var queryParams = {};
+  var queryParams = GE.queryParams || {};
 
-  if (DE.discourseEmbedUrl) {
-    queryParams.embed_url = encodeURIComponent(DE.discourseEmbedUrl);
+  queryParams.embed = true;
+
+  if (GE.embedUrl) {
+    queryParams.embed_url = encodeURIComponent(GE.embedUrl);
   }
 
-  if (DE.discourseUserName) {
-    queryParams.discourse_username = DE.discourseUserName;
-  }
-
-  if (DE.topicId) {
-    queryParams.topic_id = DE.topicId;
-  }
-
-  var src = DE.discourseUrl + 'embed/comments';
+  var src = GE.grafanaUrl + '/dashboard/db/' + GE.dashboard;
   var keys = Object.keys(queryParams);
   if (keys.length > 0) {
     src += "?";
@@ -36,11 +29,13 @@
   }
 
   iframe.src = src;
-  iframe.id = 'discourse-embed-frame';
+  iframe.id = 'grafana-embed-frame';
   iframe.width = "100%";
+  iframe.height = "0px";
   iframe.frameBorder = "0";
   iframe.scrolling = "no";
-  comments.appendChild(iframe);
+
+  dashboard.appendChild(iframe);
 
   // Thanks http://amendsoft-javascript.blogspot.ca/2010/04/find-x-and-y-coordinate-of-html-control.html
   function findPosY(obj)
@@ -65,14 +60,14 @@
 
   function postMessageReceived(e) {
     if (!e) { return; }
-    if (DE.discourseUrl.indexOf(e.origin) === -1) { return; }
+    if (GE.grafanaUrl.indexOf(e.origin) === -1) { return; }
 
     if (e.data) {
-      if (e.data.type === 'discourse-resize' && e.data.height) {
+      if (e.data.type === 'grafana-resize' && e.data.height) {
         iframe.height = e.data.height + "px";
       }
 
-      if (e.data.type === 'discourse-scroll' && e.data.top) {
+      if (e.data.type === 'grafana-scroll' && e.data.top) {
         // find iframe offset
         var destY = findPosY(iframe) + e.data.top;
         window.scrollTo(0, destY);
